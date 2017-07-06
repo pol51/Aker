@@ -120,7 +120,7 @@ class Hosts(object):
 		#load from cache
 		if from_cache:
 			# is redis up ?
-			if self.redis is not None :
+			if self.redis is not None:
 				cached = self._load_hosts_from_cache(self.user_cache_key)
 		
 		#backened cache has some entries for us

@@ -10,57 +10,58 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 import urwid
-import aker
-import signal
 import logging
-import os
 from popup import SimplePopupLauncher
 
+
 class MenuItem(urwid.Text):
-    def __init__(self, caption):
-        urwid.Text.__init__(self, caption)
-        urwid.register_signal(self.__class__, ['connect'])
+	def __init__(self, caption):
+		urwid.Text.__init__(self, caption)
+		urwid.register_signal(self.__class__, ['connect'])
 
-        
-    def keypress(self, size, key):
-        if key == 'enter':
-            urwid.emit_signal(self, 'connect')
-        else:
-            return key
-            
-    def selectable(self):
-        return True 
+	def keypress(self, size, key):
+		if key == 'enter':
+			urwid.emit_signal(self, 'connect')
+		else:
+			return key
 
-    
+	def selectable(self):
+		return True
+
+
+class HostItem(MenuItem):
+	def __init__(self, hostname, port):
+		MenuItem.__init__(self, hostname)
+		self.hostname = hostname
+		self.port = port
+
+
 class Window(object):
-	""" Where all the Tui magic happens,
-		handles creating urwid widgets and
-		user keypresses 
-		"""
+	"""
+	Where all the Tui magic happens,
+	handles creating urwid widgets and
+	user keypresses
+	"""
 	
 	def __init__(self,aker_core):   
 		self.aker = aker_core
 		self.draw()
-	
-	
-	def refresh_hosts(self,hosts):
+
+	def refresh_hosts(self, hosts):
 		body = []
+		# ToDo: modify hosts to handle all hos infos + get the port from it
 		for hostname in hosts:
-			host = MenuItem("%s" % (hostname))
-			urwid.connect_signal(host, 'connect', self.host_chosen, hostname) # host chosen action
+			host = HostItem(hostname, self.aker.port)
+			urwid.connect_signal(host, 'connect', self.host_chosen, host)  # host chosen action
 			body.append(urwid.AttrMap(host,'body', focus_map='SSH_focus'))
 		return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 	
 	def host_chosen(self,choice):
 		username = self.aker.user.name
-		# TODO: per host port
-		port = self.aker.port
-		logging.debug("TUI: user %s chose server %s " % (username,choice))
+		logging.debug("TUI: user %s chose server %s " % (username, choice.hostname))
 		self.loop.draw_screen()
 		self.aker.init_connection(choice)
 		
-    
-    
 	def draw(self):
 		self.palette = [
             ('body', 'black', 'light gray'),  # Normal Text

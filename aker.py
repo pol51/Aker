@@ -115,14 +115,14 @@ class Aker(object):
 		self.tui.draw()
 		self.tui.start()
 
-	def init_connection(self,host):
+	def init_connection(self, host):
 		screen_size = self.tui.loop.screen.get_cols_rows()
 		logging.debug("Core: pausing TUI")
 		self.tui.pause()
 		#TODO: check for shorter yet unique uuid
 		session_uuid = uuid.uuid4()
 		session_start_time = time.strftime("%Y%m%d-%H%M%S")
-		session = SSHSession(self,host,session_uuid)
+		session = SSHSession(self, host.hostname, host.port, session_uuid)
 		#TODO: add err handling
 		sniffer = SSHSniffer(self.posix_user,config.src_port,host,session_uuid,screen_size)
 		session.attach_sniffer(sniffer)

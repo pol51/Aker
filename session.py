@@ -17,11 +17,11 @@ class Session(object):
 	Base Session class 
 	"""
 
-	def __init__(self,aker_core,host,uuid):
+	def __init__(self,aker_core,host,port,uuid):
 		self.aker= aker_core
 		self.host = host
 		self.host_user = self.aker.user.name
-		self.host_port = int(self.aker.port)
+		self.host_port = int(port)
 		self.src_port = self.aker.config.src_port
 		self.uuid = uuid
 		logging.debug("Session: Base Session created")
@@ -52,8 +52,8 @@ class SSHSession(Session):
 		a new SSHClient instance every time
 	"""
 	
-	def __init__(self, aker_core, host,uuid):
-		super(SSHSession, self).__init__(aker_core, host,uuid)
+	def __init__(self, aker_core, host, port, uuid):
+		super(SSHSession, self).__init__(aker_core, host, port, uuid)
 		self._client = SSHClient(self)
 		logging.debug("Session: SSHSession created")
 
