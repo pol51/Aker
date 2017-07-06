@@ -10,10 +10,11 @@ from IdPFactory import IdP
 import json
 import logging
 
+
 class Json(IdP):
-	'''
-	Fetch the authority informataion from a JSON configuration 
-	'''
+	"""
+	Fetch the authority informataion from a JSON configuration
+	"""
 	def __init__(self,config,username,gateway_hostgroup):
 		super(Json,self).__init__(username,gateway_hostgroup)
 		logging.info("Json: loaded")
@@ -35,10 +36,10 @@ class Json(IdP):
 		self.__define_allowed_hosts()
 
 	def __define_allowed_hosts(self):
-		'''
+		"""
 		Fetch the allowed hosts based on if the user has a record in the users array.
 		Fetch hosts that are associated with selected user or groups the user is a member of
-		'''
+		"""
 		user = next((user for user in self.users if user.get("username") == self.user), None)
 		if(user == None):
 			self._allowed_ssh_hosts = []
@@ -48,7 +49,7 @@ class Json(IdP):
 		for h in self._all_ssh_hosts:
 			if h.get("users") is not None:
 				for u in h.get("users"):
-				 	if self.user == u:
+					if self.user == u:
 						self.__add_host_to_allowed(h.get("hostname"))
 
 
@@ -60,9 +61,9 @@ class Json(IdP):
 							self.__add_host_to_allowed(h.get("hostname"))
 
 	def __add_host_to_allowed(self,host):
-		'''
+		"""
 		Add a unique host to the list of allowed hosts
-		'''
+		"""
 		if host not in self._allowed_ssh_hosts:
 			logging.debug("Json: adding host {0} to allowed hosts".format(host))
 			self._allowed_ssh_hosts.insert(0,host)		

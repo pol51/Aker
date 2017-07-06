@@ -13,8 +13,6 @@ import redis
 from IdPFactory import IdPFactory
 
 
-
-
 class Host(object):
 	"""
 	Class representing a single server entry , servers have the following attributes :
@@ -26,19 +24,15 @@ class Host(object):
 	def __init__(self, name, ssh_port=22):
 		self.fqdn = name
 		self.ssh_port = ssh_port
-   
+
 	def equal(self,server):
-		if self.fqdn == server.fqdn and self.ssh_port == server.ssh_port:
-			return True
-		else:
-			return False
-            
+		return self.fqdn == server.fqdn and self.ssh_port == server.ssh_port
+
 	def __str__(self):
 		return "fqdn:%d, ssh_port:%d" % (self.fqdn, self.ssh_port)
-		
+
 	def __iter__(self):
 		return self
-
 
 
 class Hosts(object):
@@ -60,14 +54,13 @@ class Hosts(object):
 		#TODO: do we need a configurable redis host?
 		self.redis = self._init_redis_conn('localhost')
 		
-		
 	def _init_redis_conn(self,RedisHost):
 		redis_connection = redis.StrictRedis(RedisHost, db=0, decode_responses = True)		
 		try:
 			if redis_connection.ping():
 				return redis_connection
 		except Exception as e:
-			logging.error("Hosts: all subsequent calls will fallback to backened idp, cache error: {0}".format(e.message))
+			logging.error("Hosts: all subsequent calls will fallback to backened idp, cache error: {0}", e)
 			return None
 	
 	def _load_hosts_from_cache(self, hkey):
@@ -83,7 +76,7 @@ class Hosts(object):
 					self._allowed_ssh_hosts.append(json.loads(v)['fqdn'])
 					cached = True
 			except Exception as e:
-				logging.error("Hosts: redis error: {0}".format(e.message))
+				logging.error("Hosts: redis error: {0}", e)
 				cached = False 			
 		else:
 			logging.info("Hosts: no hosts loaded from cache for user %s" % self.user) 

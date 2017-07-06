@@ -11,22 +11,20 @@ __version__ = '0.4.4'
 __version_info__ = (0, 4, 4)
 __license__ = "AGPLv3"
 __license_info__ = {
-    "AGPLv3": {
-        "product": "aker",
-        "users": 0, # 0 being unlimited
-        "customer": "Unsupported",
-        "version": __version__,
-        "license_format": "1.0",
-    }
+	"AGPLv3": {
+		"product": "aker",
+		"users": 0,  # 0 being unlimited
+		"customer": "Unsupported",
+		"version": __version__,
+		"license_format": "1.0",
+	}
 }
 
 import logging
 import os
-import sys
 import uuid
 import getpass
 import paramiko
-import socket
 from configparser import ConfigParser,NoOptionError
 import time
 
@@ -39,6 +37,7 @@ from snoop import SSHSniffer
 config_file = "/etc/aker/aker.ini"
 log_file = '/var/log/aker/aker.log'
 session_log_dir = '/var/log/aker/'
+
 
 class Configuration(object):
 	def __init__(self, filename):
@@ -65,7 +64,6 @@ class Configuration(object):
 			return self.configparser.get('General',args[0])
 
 
-
 class User(object):
 	def __init__(self,username):
 		self.name = username
@@ -74,7 +72,6 @@ class User(object):
 		logging.debug("Core: using Identity Provider {0}".format(idp))
 		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
-
 
 	def get_priv_key(self):
 		try :
@@ -89,11 +86,6 @@ class User(object):
 	def refresh_allowed_hosts(self,fromcache):
 		logging.info("Core: reloading hosts for user {0} from backened identity provider".format(self.name))
 		self.allowed_ssh_hosts = self.hosts.list_allowed(from_cache=fromcache)
-
-
-
-
-
 
 
 class Aker(object):
@@ -142,7 +134,6 @@ class Aker(object):
 			session.stop_sniffer()
 			self.tui.restore()
 			self.tui.search_edit.set_edit_text("") # Clear selected hosts
-
 
 	def session_end_callback(self, session):
 		logging.info("Core: Finished session UUID {0} for user {1} to host {2}".format(session.uuid,self.posix_user,session.host))

@@ -7,19 +7,16 @@
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
-
 import logging
-import signal
-import os
-import time
 import getpass
 from SSHClient import SSHClient
+
 
 class Session(object):
 	""" 
 	Base Session class 
 	"""
-	
+
 	def __init__(self,aker_core,host,uuid):
 		self.aker= aker_core
 		self.host = host
@@ -35,11 +32,10 @@ class Session(object):
 	
 	def stop_sniffer(self):
 		self._client.stop_sniffer()
-		
-			
+
 	def connect(self, size):
 		self._client.connect(self.host, self.host_port, size)
-        
+
 	def start_session(self):
 		raise NotImplementedError
 		
@@ -49,7 +45,6 @@ class Session(object):
 	def kill_session(self, signum, stack):
 		logging.debug("Session: Session ended")
 		self.close_session()
-
 
 
 class SSHSession(Session):

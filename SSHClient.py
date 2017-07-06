@@ -17,12 +17,17 @@ import signal
 import select
 import os
 import errno
-import time
 import fcntl
 import getpass
+import struct
 
+try:
+	basestring
+except:
+	basestring = (str, bytes)
 
 TIME_OUT = 10
+
 
 class Client(object):
 	def __init__(self, session):
@@ -38,13 +43,13 @@ class Client(object):
 
 	@staticmethod
 	def get_console_dimensions():
-		cols, lines = 80, 24
+		columns, lines = 80, 24
 		try:
 			fmt = 'HH'
 			buffer = struct.pack(fmt, 0, 0)
 			result = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, buffer)
 			columns, lines = struct.unpack(fmt, result)
-		except Exception, e:
+		except Exception:
 			pass
 		finally:
 			return columns, lines
@@ -56,15 +61,14 @@ class SSHClient(Client):
 		self._socket = None
 		self.channel = None
 		logging.debug("Client: Client Created")
-		
+
 	def connect(self, ip, port, size):
 		self._size = size
 		self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self._socket.settimeout(TIME_OUT)
 		self._socket.connect((ip, port))
 		logging.debug("SSHClient: Connected to {0}:{1}".format(ip,port))
-		
-		
+
 	def get_transport(self):
 		transport = paramiko.Transport(self._socket)
 		transport.set_keepalive(10)
@@ -72,23 +76,23 @@ class SSHClient(Client):
 		return transport
 
 	def start_session(self, user, auth_secret):
-  		try:
-  			transport = self.get_transport()
-  			if isinstance(auth_secret, basestring):
+		try:
+			transport = self.get_transport()
+			if isinstance(auth_secret, basestring):
 				logging.debug("SSHClient: Authenticating using password")
- 				transport.auth_password(user, auth_secret)
- 			else:
- 				try:
+				transport.auth_password(user, auth_secret)
+			else:
+				try:
 					logging.debug("SSHClient: Authenticating using key-pair")
- 					transport.auth_publickey(user, auth_secret)
- 				# Failed to authenticate with SSH key, so
- 				# try a password instead.
- 				except paramiko.ssh_exception.AuthenticationException:
+					transport.auth_publickey(user, auth_secret)
+				# Failed to authenticate with SSH key, so
+				# try a password instead.
+				except paramiko.ssh_exception.AuthenticationException:
 					logging.debug("SSHClient: Authenticating using password")
- 					transport.auth_password(user, getpass.getpass())
-  			self._start_session(transport)
-  		except Exception as e:
-  			logging.error("SSHClient:: error authenticating : {0} ".format(e.message))
+					transport.auth_password(user, getpass.getpass())
+			self._start_session(transport)
+		except Exception as e:
+			logging.error("SSHClient:: error authenticating : {0} ".format(e.message))
 			self._session.close_session()
 			if transport:
 				transport.close()
@@ -109,7 +113,7 @@ class SSHClient(Client):
 				sniffer.set_logs()
 			except AttributeError:
 				pass
-		
+
 	def _start_session(self, transport):
 		self.channel = transport.open_session()
 		columns, lines = self._size
@@ -127,13 +131,12 @@ class SSHClient(Client):
 		self._socket.close()
 
 	def sigwinch(self, signal, data):
-		columns, lines = get_console_dimensions()
+		columns, lines = Client.get_console_dimensions()
 		logging.debug("SSHClient: setting terminal to %s columns and %s lines" % (columns, lines))
 		self.channel.resize_pty(columns, lines)
 		for sniffer in self.sniffers:
 			sniffer.sigwinch(columns, lines)
-            
-        
+
 	def interactive_shell(self, chan):
 		"""
 		Handles ssh IO
@@ -153,7 +156,7 @@ class SSHClient(Client):
 				except Exception as e:
 					logging.error(e)
 					pass
-                    
+
 				if chan in r:
 					try:
 						x = chan.recv(10240)
@@ -171,7 +174,7 @@ class SSHClient(Client):
 								continue
 					except socket.timeout:
 						pass
-                        
+
 				if sys.stdin in r:
 					try:
 						buf = os.read(sys.stdin.fileno(), 4096)
@@ -180,11 +183,9 @@ class SSHClient(Client):
 						pass
 					for sniffer in self.sniffers:
 						sniffer.stdin_filter(buf)
-						
+
 					chan.send(buf)
-											
-               
+
 		finally:
 			logging.debug("SSHClient: interactive session ending")
 			termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-						

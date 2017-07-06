@@ -7,8 +7,6 @@
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
-
-
 import logging
 import codecs
 import re
@@ -41,15 +39,12 @@ class Sniffer(object):
 		self.term_cols, self.term_rows = screen_size
 		self._fake_terminal()
 		logging.debug("Sniffer: Sniffer Created")
-		
-		
+
 	def _fake_terminal(self):
 		logging.debug("Sniffer: Creating Pyte screen with cols %i and rows %i" % (self.term_cols, self.term_rows))		
 		self.screen = pyte.Screen(self.term_cols, self.term_rows)
 		self.stream = pyte.ByteStream()
 		self.stream.attach(self.screen)
-
-		
 		
 	def extract_command(self,buf):
 		"""
@@ -112,8 +107,6 @@ class Sniffer(object):
 				i = pos
 				result = substr
 		return result
-    
-		
 
 	def set_logs(self):
 		# local import
@@ -138,19 +131,19 @@ class Sniffer(object):
 		self.log_timer = log_timer
 		self.log_cmds = log_cmds
 		
-		
 	def stop(self):
 		session_end = time.strftime("%Y/%m/%d %H:%M:%S")
 		#Sayonara
-		jsonmsg= { 'ver': '1',
-		   'host': self.host,
-		   'user': self.user,
-		   'session': str(self.uuid),
-		   'sessionstart': self.session_date_time,
-		   'sessionend': session_end,
-		   'timing': session_end,
-		   }
-		   
+		jsonmsg= {
+			'ver': '1',
+			'host': self.host,
+			'user': self.user,
+			'session': str(self.uuid),
+			'sessionstart': self.session_date_time,
+			'sessionend': session_end,
+			'timing': session_end,
+		}
+
 		try:
 			with open(self.log_cmds, 'a') as outfile:
 				jsonout = json.dumps(jsonmsg)
@@ -161,10 +154,6 @@ class Sniffer(object):
 		self.log_file.write('Session End %s' % session_end)
 		self.log_file.close()
 		self.log_timer.close()
-
-
-
-
 
 
 class SSHSniffer(Sniffer):
@@ -181,7 +170,6 @@ class SSHSniffer(Sniffer):
 		self.start_alt_mode = set(['\x1b[?47h', '\x1b[?1049h', '\x1b[?1047h'])
 		self.end_alt_mode = set(['\x1b[?47l', '\x1b[?1049l', '\x1b[?1047l'])
 		self.alt_mode_flags = tuple(self.start_alt_mode) + tuple(self.end_alt_mode)
-		
 
 	def channel_filter(self, x):
 		now_timestamp = time.time()
@@ -195,7 +183,6 @@ class SSHSniffer(Sniffer):
 		#Accumlate data when in stdin_active
 		if self.stdin_active:
 			self.buf += x
-
 
 	def stdin_filter(self, x):
 		self.stdin_active = True
@@ -238,8 +225,7 @@ class SSHSniffer(Sniffer):
 							outfile.write(jsonout + '\n')
 					except Exception as e:
 						logging.error("Sniffer: stdin_filter error {0} ".format(e.message))
-					jsonmsg= {}
-					
+
 			self.buf = ""
 			self.vim_data = ""	
 			self.stdin_active = False		

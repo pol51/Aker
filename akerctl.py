@@ -10,9 +10,7 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 import sys
 from contextlib import closing
-from math import ceil
 import time
-import os
 import codecs
 import os
 import fnmatch
@@ -71,14 +69,13 @@ def replay(log_file, time_file):
 					
 
 def locate(pattern, root=os.curdir):
-	match = "" 
+	matches = ""
 	for path, dirs, files in os.walk(os.path.abspath(root)):
 		for filename in fnmatch.filter(files, pattern):
 			matches= os.path.join(path, filename)
 	return matches
 
 def get_timing(timef):
-	timing = None
 	with closing(timef):
 		timing = [l.strip().split(' ') for l in timef]
 		timing = [(float(r[0]), int(r[1])) for r in timing]

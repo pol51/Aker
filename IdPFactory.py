@@ -11,8 +11,6 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 import logging
 import importlib
-import sys
-import os
 
 
 class IdPFactory(object):
@@ -20,20 +18,17 @@ class IdPFactory(object):
 	@staticmethod
 	def getIdP(choice):
 		
-		logging.info("IdPFactory: trying dynamic loading of module : {0} ".format(choice))
+		logging.info("IdPFactory: trying dynamic loading of module : %s", choice)
 		#load module from subdir idp
 		idp = "idp."+ choice
 		try:
 			idp_module = importlib.import_module(idp)
 			idp_class = getattr(idp_module, choice)
 		except Exception as e:
-				logging.error("IdPFactory: error loading module : {0}".format(e.message))
+				logging.error("IdPFactory: error loading module : %s", e)
 		
 		return idp_class
 		
-			
-			
-
 
 class IdP(object):
 	'''
